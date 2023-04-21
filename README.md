@@ -22,7 +22,7 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 This gem allows you to easily rank `::ActiveRecord` items without worrying about the underlying logic. After installing the gem, add the following `acts_as_ranked_list` to the `::ActiveRecord` model, for example:
 
-```
+```ruby
 class MyModelName << ::ActiveRecord::Base
     acts_as_ranked_list
 end
@@ -30,7 +30,7 @@ end
 
 When you create a new `MyModelName` item, it will be ranked among the list of existing `MyModelName` items. You can increase/decrease the item's rank by the following methods:
 
-```
+```ruby
 item_a = MyModelName.create!
 item_a.increase_rank
 item_a.decrease_rank
@@ -38,7 +38,7 @@ item_a.decrease_rank
 
 You can get the current rank of the item by the following:
 
-```
+```ruby
 item_a = MyModelName.create! # is at the bottom of the list, highest rank item
 item_b = MyModelName.create! # is at the bottom of the list, lowest rank item
 item_a.current_rank # 1
@@ -49,7 +49,7 @@ Note that the list is viewed as ascending order of `rank, last updated at, id`. 
 
 You may get the highest items in the list sorted by rank by the following methods:
 
-```
+```ruby
 my_existing_item = MyModelName.create! # placed top in the list
 my_new_item = MyModelName.create! # placed bottom in the list
 MyModelName.get_highest_items # ActiveRecord::Relation with results [my_existing_item, my_new_item]
@@ -57,7 +57,7 @@ MyModelName.get_highest_items # ActiveRecord::Relation with results [my_existing
 
 You may get the highest/lowest item by specifying a number as the first argument to the `get_highest_items`/`get_lowest_items` methods, such as:
 
-```
+```ruby
 my_existing_item = MyModelName.create! # placed top in the list
 my_new_item = MyModelName.create! # placed bottom in the list
 MyModelName.get_highest_items(1) # ActiveRecord::Relation with results [my_existing_item] # Note the result is an array
@@ -70,7 +70,7 @@ MyModelName.get_highest_items(50000) # ActiveRecord::Relation with results [my_e
 
 For the next examples, each will be initialized to the following:
 
-```
+```ruby
 class TodoItem << ::ApplicationRecord
     # the rank column is named "priority" (without quotation marks) for this table
     # new items are added as highest priority
@@ -91,7 +91,7 @@ print_on_shirt = TodoItem.create!(title: "Print a prototype design on the shrit 
 
 You can check if an item is the highest item or the lowest item in the list by using the `highest_item?` or `lowest_item?` instance methods.
 
-```
+```ruby
 design_reusable_plastic_bag_graphic.lowest_item? # true
 design_reusable_plastic_bag_graphic.highest_item? # false
 print_on_shirt.highest_item? # true
@@ -101,13 +101,13 @@ print_on_shirt.highest_item? # true
 
 You can get the higher/lower items by using the instance methods `get_higher_items` or `get_lower_items`:
 
-```
+```ruby
 exercise.get_higher_items # items and their priorities (note the order): [["health_check", 0.25], ["print_on_shirt", 0.125]]
 ```
 
 You may pass in optional arguments to control how the results are returned. If the first argument is `0`, it will return all higher/lower items.
 
-```
+```ruby
 design_reusable_plastic_bag_graphic.get_higher_items(2, "ASC") # [["health_check", 0.25], ["exercise", 0.5]]
 ```
 
@@ -115,13 +115,13 @@ design_reusable_plastic_bag_graphic.get_higher_items(2, "ASC") # [["health_chec
 
 If the value of the rank column for the instance is `nil` then the item is not ranked. This item will still interact with the list when running queries such as `highest_item?` and so on. This item will be given a rank when [spreading ranks](spread-ranks).
 
-```
+```ruby
 design_reusable_plastic_bag_graphic.is_ranked? # true
 ```
 
 You may create a new item with nil rank as follows:
 
-```
+```ruby
 ## this persists the record, but skips callbacks
 ::TodoItem.with_skip_persistence { ::TodoItem.create!(rank: nil) }
 ```
@@ -130,13 +130,13 @@ You may create a new item with nil rank as follows:
 
 Instead of updating rank one or down one position at a time, you can move above/below another item, using `set_rank_above` or `set_rank_below` instance methods:
 
-```
+```ruby
 design_reusable_plastic_bag_graphic.set_rank_above(health_check)
 ```
 
 This can be used together with the `get_highest_items(1)` class method to move item to the top of the list.
 
-```
+```ruby
 design_reusable_plastic_bag_graphic.set_rank_above(TodoItem.get_highest_items(1).first)
 ```
 
@@ -148,7 +148,7 @@ Skipping persistence is useful if you want to mass update items, and persist onc
 
 You can use the class method `with_skip_persistence` as follows:
 
-```
+```ruby
 TodoItem.with_skip_persistence do
     design_reusable_plastic_bag_graphic.update(rank: 20.3)
     exercise.update(rank: 5.2)
@@ -166,7 +166,7 @@ end
 
 You may also pass in an array of classes to the `with_skip_persistence` method to skip persistence for these `::ActiveRecord` models which use the `acts_as_ranked_list` concern.
 
-```
+```ruby
 TodoItem.with_skip_persistence([FootballTeam]) do # the calling class is added by default, in this case: `TodoItem`
     design_reusable_plastic_bag_graphic.increase_rank
     exercise.increase_rank
@@ -197,7 +197,7 @@ end
 
 You can control whether to spread ranks or not on collisions by using the option `avoid_collisions: true` (by default) on using the concern in your `::ActiveRecord` model. You can change this setting on a per-block per-class basis by using the following class method:
 
-```
+```ruby
 # disallows collisions
 TodoItem.with_avoid_collisions(true) do # do spread ranks on collisions
     TodoItem.find(1).update(rank: 1)
@@ -205,7 +205,7 @@ TodoItem.with_avoid_collisions(true) do # do spread ranks on collisions
 end # items with their new ranks [["health_check", 1.0], ["exercise", 2.0], ["print_on_shirt", 3.0], ["design_reusable_plastic_bag_graphic", 4.0]]
 ```
 
-```
+```ruby
 # allows collisions
 TodoItem.with_avoid_collisions(false) do # do not spread ranks on collisions
     TodoItem.find(1).update(rank: 1)
@@ -221,7 +221,7 @@ You can spread ranks so that the difference between each rank and the next is se
 
 If `avoid_collisions = true (by default)`. Then you do not have to use spread ranks manually. If the database raises an overflow error when mutating a rank, then it could be time to recalibrate the ranks in the table. You should handle this case in your code, and spread ranks. This is very infrequent. For example, in postgres this error will be raised when using the default precision of `16_383` digits after the decimal of a `decimal` column type in postgres versions `9.1+`:
 
-```
+```ruby
 ActiveRecord::RangeError: PG::NumericValueOutOfRange: ERROR:  value overflows numeric format
 ```
 
@@ -233,7 +233,7 @@ Items are spread in, ascending order of each, by:
 
 To spread ranks:
 
-```
+```ruby
 TodoItem.spread_ranks
 TodoItem.get_highest_items # items with their new ranks [["print_on_shirt", 1.0], ["health_check", 2.0], ["exercise", 3.0], ["design_reusable_plastic_bag_graphic", 4.0]]
 ```
@@ -246,7 +246,7 @@ Imagine the scenario where you have 199 records to rank, and you must rank them 
 
 If you use a `step_increment` of 1 you will be faced with a max float/integer overflow error by the database, as some of the ranks are more than 2 digits before the decimal point. You may use a decimal `step_increment` that is less than 1, and suitable for this scenario, and ranking will work as expected, without errors.
 
-```
+```ruby
 class CrammedTodoItem << ::ActiveRecord::Base
     acts_as_ranked_list step_increment: 0.5
 end
