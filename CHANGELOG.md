@@ -1,4 +1,26 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+ 
+The format is based on [Keep a Changelog](http://keepachangelog.com/)
+and this project adheres to [Semantic Versioning](http://semver.org/).
+
 ## [Unreleased]
+
+- Allows unranked items in list by having `nil` values. New items can also be added as unranked.
+- Allows different scopes on the items by referencing another column.
+
+## [0.2.0] - 2023-04-21
+
+- Adds gem documentation
+- Adds gem tests
+- Adds gem functionality to rank `::ActiveRecord` objects.
+  - Adds AvoidsCollisions
+  - Adds SkipPersistence
+  - Adds PersistenceCallback
+  - Adds RankColumn
+  - Adds Service
+- Adds Base error
 
 ## [0.1.0] - 2023-04-11
 
