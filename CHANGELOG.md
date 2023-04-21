@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Allows unranked items in list by having `nil` values. New items can also be added as unranked.
 - Allows different scopes on the items by referencing another column.
 
+## [0.2.1] - 2023-04-21
+
+- Bumps gem version to reflect changes in `.gemspec` file. No gem functionality changes.
+
 ## [0.2.0] - 2023-04-21
 
 - Adds gem documentation
