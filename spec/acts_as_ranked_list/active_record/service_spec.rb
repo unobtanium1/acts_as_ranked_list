@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 ::RSpec.describe ::ActsAsRankedList::ActiveRecord::Service do
-  # test skipped invalid
-
   describe "#current_rank" do
     context "when using a decimal column called rank" do
       let(:todo_item) { ::TodoItem.create!(title: "title", rank: 20) }
@@ -446,6 +444,21 @@
         value_after_spread = ::ActiveRecord::Base.connection.execute(sql).to_a.map { |diff| diff["diff_value"] }
         expect(value_before_spread).to eq((0..3).to_a)
         expect(value_after_spread).to eq((::TodoItem.step_increment .. ::TodoItem.step_increment * 4).step(::TodoItem.step_increment).to_a)
+      end
+    end
+
+    context "when items are not ranked" do
+      let!(:todo_item_group) do
+        ::TodoItem.with_skip_persistence do
+          4.times.each_with_index do |index|
+            ::TodoItem.create!(rank: nil)
+          end
+        end
+      end
+
+      it "ignores those items" do
+        ::TodoItem.spread_ranks
+        expect(::TodoItem.pluck(:rank).compact).to be_blank
       end
     end
   end

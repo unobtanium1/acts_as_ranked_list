@@ -62,6 +62,7 @@ module ActsAsRankedList #:nodoc:
               SET #{quoted_rank_column} = ORDERED_ROW_NUMBER_CTE.rn * #{step_increment} #{with_touch}
               FROM ORDERED_ROW_NUMBER_CTE
               WHERE #{caller_class.quoted_table_name}.#{caller_class.primary_key} = ORDERED_ROW_NUMBER_CTE.#{caller_class.primary_key}
+              AND #{quoted_rank_column_with_table_name} IS NOT NULL
             SQL
 
             connection.execute(sql)
