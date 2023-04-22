@@ -35,6 +35,14 @@
         expect(todo_item.current_rank).not_to be_nil
       end
     end
+
+    context "when new items should be unranked" do
+      let(:todo_item) { ::UnrankedTodoItem.create! }
+
+      it "creates a new unranked object" do
+        expect(todo_item.current_rank).to be_nil
+      end
+    end
   end
 
   describe "#increase_rank" do
