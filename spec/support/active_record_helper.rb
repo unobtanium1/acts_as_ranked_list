@@ -39,16 +39,19 @@ connect_to_databse
 initialize_schema
 
 class TodoItem < ::ActiveRecord::Base
+  abstract_class
+end
+
+class DefaultTodoItem < TodoItem
   acts_as_ranked_list
+end
+
+class UnrankedTodoItem < TodoItem
+  acts_as_ranked_list new_item_at: :unranked
 end
 
 class AdvancedTodoItem < ::ActiveRecord::Base
   acts_as_ranked_list column: "position", step_increment: 128, new_item_at: :highest
-end
-
-class UnrankedTodoItem < ::ActiveRecord::Base
-  self.table_name = "todo_items"
-  acts_as_ranked_list new_item_at: :unranked
 end
 
 class InvalidColumnNameTodoItem < ::ActiveRecord::Base
