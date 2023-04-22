@@ -201,6 +201,8 @@ module ActsAsRankedList #:nodoc:
           end
 
           define_method :get_higher_items do |limit = 0, order = "DESC", rank = nil, distinct = false, include_self_rank = false|
+            return if current_rank.nil?
+
             operator = include_self_rank ? "<=" : "<"
             rank ||= current_rank
 
@@ -216,6 +218,8 @@ module ActsAsRankedList #:nodoc:
           end
 
           define_method :get_lower_items do |limit = 0, order = "ASC", rank = nil, distinct = false, include_self_rank = false|
+            return if current_rank.nil?
+
             operator = include_self_rank ? ">=" : ">"
             rank ||= current_rank
 

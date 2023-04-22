@@ -72,6 +72,55 @@
         expect(advanced_todo_item_a.current_rank < advanced_todo_item_b.current_rank).to be_truthy
       end
     end
+
+    context "when current item is unranked" do
+      let!(:todo_item_a) { ::UnrankedTodoItem.create! }
+      let!(:todo_item_b) { ::UnrankedTodoItem.create! }
+
+      it "not raises error" do
+        expect(todo_item_b.current_rank).to be_nil
+        expect { todo_item_b.increase_rank }.not_to raise_error
+      end
+    end
+  end
+
+  describe "#decrease_rank" do
+    before do
+      ::TodoItem.delete_all
+      ::AdvancedTodoItem.delete_all
+    end
+
+    context "when adding items at the bottom of the list" do
+      let!(:todo_item_a) { ::TodoItem.create! }
+      let!(:todo_item_b) { ::TodoItem.create! }
+
+      it "puts item higher in the list" do
+        expect(todo_item_a.current_rank < todo_item_b.current_rank).to be_truthy
+        todo_item_a.decrease_rank
+        expect(todo_item_a.current_rank < todo_item_b.current_rank).to be_falsey
+      end
+    end
+
+    context "when adding items at the top of the list" do
+      let!(:advanced_todo_item_a) { ::AdvancedTodoItem.create! }
+      let!(:advanced_todo_item_b) { ::AdvancedTodoItem.create! }
+
+      it "puts item higher in the list" do
+        expect(advanced_todo_item_a.current_rank < advanced_todo_item_b.current_rank).to be_falsey
+        advanced_todo_item_b.decrease_rank
+        expect(advanced_todo_item_a.current_rank < advanced_todo_item_b.current_rank).to be_truthy
+      end
+    end
+
+    context "when current item is unranked" do
+      let!(:todo_item_a) { ::UnrankedTodoItem.create! }
+      let!(:todo_item_b) { ::UnrankedTodoItem.create! }
+
+      it "not raises error" do
+        expect(todo_item_a.current_rank).to be_nil
+        expect { todo_item_a.decrease_rank }.not_to raise_error
+      end
+    end
   end
 
   describe ".get_highest_items" do
