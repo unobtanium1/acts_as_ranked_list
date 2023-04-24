@@ -23,7 +23,7 @@ If bundler is not being used to manage dependencies, install the gem by executin
 This gem allows you to easily rank `::ActiveRecord` items without worrying about the underlying logic. After installing the gem, add the following `acts_as_ranked_list` to the `::ActiveRecord` model, for example:
 
 ```ruby
-class MyModelName << ::ActiveRecord::Base
+class MyModelName < ::ActiveRecord::Base
     acts_as_ranked_list
 end
 ```
@@ -71,7 +71,7 @@ MyModelName.get_highest_items(50000) # ActiveRecord::Relation with results [my_e
 For the next examples, each will be initialized to the following:
 
 ```ruby
-class TodoItem << ::ApplicationRecord
+class TodoItem < ::ApplicationRecord
     # the rank column is named "priority" (without quotation marks) for this table
     # new items are added as highest priority
     acts_as_ranked_list column: "priority", adds_new_at: :highest, step_increment: 1.0
@@ -87,7 +87,7 @@ print_on_shirt = TodoItem.create!(title: "Print a prototype design on the shrit 
 # the lowest prioritised item is "design_reusable_plastic_bag_graphic"
 ```
 
-### Query position of current item
+#### Query position of current item
 
 You can check if an item is the highest item or the lowest item in the list by using the `highest_item?` or `lowest_item?` instance methods.
 
@@ -109,6 +109,45 @@ You may pass in optional arguments to control how the results are returned. If t
 
 ```ruby
 design_reusable_plastic_bag_graphic.get_higher_items(2, "ASC") # [["health_check", 0.25], ["exercise", 0.5]]
+```
+
+#### Scoping items
+
+You may use scopes to constrain your items to a condition. This means you can group items together, and keep them separate from irrelevant items. For example, you may have 2 todo lists, one each for personal or work related tasks. You may fetch each list of todo items separately, and interact with them separetely using scopes.
+
+We'll add a new table, and `::ActiveRecord` model to help demonstrate this feature. For possible options on `scope`, refer to the docs on `service.rb`.
+
+```ruby
+class TodoList < ::ActiveRecord::Base
+    has_many :todo_items
+end
+
+class ScopedTodoItem < ::ActiveRecord::Base
+    belongs_to :todo_list # add to table an integer foreign key column `todo_list_id`
+
+    acts_as_ranked_list scopes: { todo_list: nil }
+end
+
+work_todo_list = ::TodoList.create!(title: "Chores at work :eye_roll:")
+personal_todo_list = ::TodoList.create!(title: "Hobbies to enjoy!!! :partying_face:")
+scoped_work_todo_item = ::ScopedTodoItem.create!(title: "Create a new table to store temporary data", list: work_todo_list, rank: 1)
+scoped_personal_todo_item = ::ScopedTodoItem.create!(title: "Assemble the new couch to enjoy sitting on", list: personal_todo_list, rank: 1)
+```
+
+In the above example, `scoped_personal_todo_item` and `scoped_work_todo_item` have the same rank but are in different scopes. So they do not have colliding ranks, and can be fetched/mutated independently of each other.
+
+You may also use a string, boolean, integer, symbol, named scopes, custom scopes (via a `::Proc`) or all of them together on the same model.
+
+```ruby
+class WorkTodoItem < ScopedTodoItem # Note the parent class
+    scope :work, -> { where(todo_list: ::TodoList.find_by(...)) }
+    default_scope { :work }
+    acts_as_ranked_list scopes: { todo_list: :work } # or
+    acts_as_ranked_list scopes: { todo_list: :work, week_day: ::Proc.new { "day_of_week = 'tuesday'" } } # or
+    acts_as_ranked_list scopes: { todo_list: :work, manager: "Mr. Disney", priority_bracket: :top, related_to_a_paying_customer: true, feature_ticket_number: 42 }
+    # these scopes will require the relevant column names on the table
+    # such as `manager (string), priority_bracket (string), related_to_a_paying_customer (boolean), feature_ticket_number (integer), week_day (preferred enum on integer, or string)
+end
 ```
 
 #### Check if the current item is ranked
@@ -247,7 +286,7 @@ Imagine the scenario where you have 199 records to rank, and you must rank them 
 If you use a `step_increment` of 1 you will be faced with a max float/integer overflow error by the database, as some of the ranks are more than 2 digits before the decimal point. You may use a decimal `step_increment` that is less than 1, and suitable for this scenario, and ranking will work as expected, without errors.
 
 ```ruby
-class CrammedTodoItem << ::ActiveRecord::Base
+class CrammedTodoItem < ::ActiveRecord::Base
     acts_as_ranked_list step_increment: 0.5
 end
 
