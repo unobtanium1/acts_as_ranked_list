@@ -7,8 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-- Allows unranked items in list by having `nil` values. New items can also be added as unranked.
-- Allows different scopes on the items by referencing another column.
+## [0.2.2] - 2023-04-24
+
+- ~~Allows unranked items in list by having `nil` values.~~ Implicitly allowed behaviour since v0.2.0, also able to add new items can also be added as unranked. Adds documentation to this feature.
+- Allows any number of different scopes on the items by referencing another column, of type:
+  - a relationship.
+  - a string, symbol, boolean or number.
+  - a custom-defined scope.
+- Fixes class method `spread_ranks` to ignore unranked items.
 
 ## [0.2.1] - 2023-04-21
 
