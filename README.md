@@ -258,7 +258,7 @@ You can spread ranks so that the difference between each rank and the next is se
 - Being able to rerank items again without overflowing column's max precision.
 - Human-readable viewing purposes. This is not recommended. The rank should be human-readable (or not viewable) at the view (presentation) layer.
 
-If `avoid_collisions = true (by default)`. Then you do not have to use spread ranks manually. If the database raises an overflow error when mutating a rank, then it could be time to recalibrate the ranks in the table. You should handle this case in your code, and spread ranks. This is very infrequent. For example, in postgres this error will be raised when using the default precision of `16_383` digits after the decimal of a `decimal` column type in postgres versions `9.1+`:
+If `avoid_collisions = true (by default)`. Then you do not have to use spread ranks manually. If the database raises an overflow error when mutating a rank, then it could be time to recalibrate the ranks in the table. You should handle this case in your code, and spread ranks. **This is very infrequent.** For example, in postgres this error will be raised when using the default precision of `16_383` digits after the decimal of a `decimal` column type in postgres versions `9.1+`:
 
 ```ruby
 ActiveRecord::RangeError: PG::NumericValueOutOfRange: ERROR:  value overflows numeric format
@@ -266,9 +266,10 @@ ActiveRecord::RangeError: PG::NumericValueOutOfRange: ERROR:  value overflows nu
 
 Items are spread in, ascending order of each, by:
 
-1. rank
-2. time updated columns (`updated_at` for example)
-3. primary key (`id` for example)
+1. scopes
+2. rank
+3. time updated columns (`updated_at` for example)
+4. primary key (`id` for example)
 
 To spread ranks:
 
